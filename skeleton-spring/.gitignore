@@ -4,3 +4,7 @@ target/
 .vscode/
 .DS_Store
 
+.settings
+bin
+.project
+.classpath
