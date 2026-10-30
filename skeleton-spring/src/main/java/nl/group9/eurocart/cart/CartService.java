@@ -55,13 +55,12 @@ public class CartService {
         BigDecimal subtotal = lines.stream()
                 .map(CartLine::lineTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        final var subtotalInclVAT = addPolishVat(subtotal);
-        return new CartView(lines, subtotal, subtotalInclVAT);
-    }
-
-    private BigDecimal addPolishVat(BigDecimal subtotal) {
-        BigDecimal withVAT = subtotal.multiply(BigDecimal.valueOf(1.23));
-        return withVAT.setScale(2, RoundingMode.HALF_UP);
+        // Sum the unrounded BTW of every line and round only once.
+        BigDecimal vat = lines.stream()
+                .map(line -> CartLine.exactVat(line.lineTotal(), line.vatRate()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+        return new CartView(lines, subtotal, vat, subtotal.add(vat));
     }
 
     private Product product(String productId) {

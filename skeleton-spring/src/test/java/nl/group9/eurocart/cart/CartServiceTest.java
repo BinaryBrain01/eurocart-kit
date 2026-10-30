@@ -75,4 +75,27 @@ class CartServiceTest {
 				.isInstanceOf(IllegalArgumentException.class);
 	}
 
+	@Test
+	void roundsVatOnlyOnceOnTheTotal() {
+		cart.add("BOK-001", 1); // NL book 12.50 at 9% = 1.125
+		CartView view = cart.add("FOD-002", 1); // NL food 1.29 at 9% = 0.1161
+
+		// Displayed line BTW is rounded per line: 1.13 + 0.12 = 1.25
+		assertThat(view.lines().get(0).vat()).isEqualByComparingTo("1.13");
+		assertThat(view.lines().get(1).vat()).isEqualByComparingTo("0.12");
+		// The real BTW is computed on the unrounded total: 1.2411 -> 1.24
+		assertThat(view.vat()).isEqualByComparingTo("1.24");
+		assertThat(view.subtotalInclVAT()).isEqualByComparingTo("15.03");
+	}
+
+	@Test
+	void appliesReducedRateForBooksAndStandardRateForLaptops() {
+		CartView view = cart.add("LAP-003", 1); // DE laptop at 19%
+
+		assertThat(view.lines()).singleElement().satisfies(line -> {
+			assertThat(line.vatRate()).isEqualByComparingTo("19");
+			assertThat(line.vat()).isEqualByComparingTo("227.81");
+		});
+	}
+
 }
