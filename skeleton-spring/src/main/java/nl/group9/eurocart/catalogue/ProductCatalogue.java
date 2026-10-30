@@ -37,7 +37,8 @@ public class ProductCatalogue {
             List<Product> products = objectMapper.readValue(in, new TypeReference<List<Product>>() {
             });
             Map<String, Product> byId = new LinkedHashMap<>();
-            for (Product product : products) {
+            for (Product catalogued : products) {
+                Product product = inLocalCurrency(catalogued);
                 if (byId.put(product.id(), product) != null) {
                     throw new IllegalStateException("Duplicate product id in catalogue.json: " + product.id());
                 }
@@ -46,6 +47,14 @@ public class ProductCatalogue {
         } catch (IOException ex) {
             throw new UncheckedIOException("Could not read catalogue.json", ex);
         }
+    }
+
+    /**
+     * catalogue.json prices are in EUR; the shop shows and sells in the local currency.
+     */
+    private static Product inLocalCurrency(Product product) {
+        return new Product(product.id(), product.name(), product.category(),
+                Currency.EUR.convertTo(Currency.LOCAL, product.price()), product.countryOfOrigin());
     }
 
 }

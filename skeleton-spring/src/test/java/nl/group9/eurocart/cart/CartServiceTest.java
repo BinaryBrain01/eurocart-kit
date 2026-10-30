@@ -25,11 +25,11 @@ class CartServiceTest {
 
 	@Test
 	void addsProductsAndSumsPricesExcludingVat() {
-		cart.add("BOK-001", 2); // 2 x 12.50
-		CartView view = cart.add("FOD-002", 1); // 1 x 1.29
+		cart.add("BOK-001", 2); // 2 x 12.50 EUR = 2 x 54.35 PLN
+		CartView view = cart.add("FOD-002", 1); // 1 x 1.29 EUR = 5.61 PLN
 
 		assertThat(view.lines()).hasSize(2);
-		assertThat(view.subtotal()).isEqualByComparingTo("26.29");
+		assertThat(view.subtotal()).isEqualByComparingTo("114.31");
 	}
 
 	@Test
@@ -39,7 +39,7 @@ class CartServiceTest {
 
 		assertThat(view.lines()).singleElement().satisfies(line -> {
 			assertThat(line.quantity()).isEqualTo(4);
-			assertThat(line.lineTotal()).isEqualByComparingTo("9.96");
+			assertThat(line.lineTotal()).isEqualByComparingTo("43.32"); // 4 x 10.83 PLN
 		});
 	}
 
@@ -77,24 +77,24 @@ class CartServiceTest {
 
 	@Test
 	void roundsVatOnlyOnceOnTheTotal() {
-		cart.add("BOK-001", 1); // NL book 12.50 at 9% = 1.125
-		CartView view = cart.add("FOD-002", 1); // NL food 1.29 at 9% = 0.1161
+		cart.add("EBK-001", 1); // 39.09 PLN at 5% = 1.9545
+		CartView view = cart.add("EBK-004", 1); // 8.65 PLN at 5% = 0.4325
 
-		// Displayed line BTW is rounded per line: 1.13 + 0.12 = 1.25
-		assertThat(view.lines().get(0).vat()).isEqualByComparingTo("1.13");
-		assertThat(view.lines().get(1).vat()).isEqualByComparingTo("0.12");
-		// The real BTW is computed on the unrounded total: 1.2411 -> 1.24
-		assertThat(view.vat()).isEqualByComparingTo("1.24");
-		assertThat(view.subtotalInclVAT()).isEqualByComparingTo("15.03");
+		// Displayed line BTW is rounded per line: 1.95 + 0.43 = 2.38
+		assertThat(view.lines().get(0).vat()).isEqualByComparingTo("1.95");
+		assertThat(view.lines().get(1).vat()).isEqualByComparingTo("0.43");
+		// The real BTW is computed on the unrounded total: 2.387 -> 2.39
+		assertThat(view.vat()).isEqualByComparingTo("2.39");
+		assertThat(view.subtotalInclVAT()).isEqualByComparingTo("50.13");
 	}
 
 	@Test
-	void appliesReducedRateForBooksAndStandardRateForLaptops() {
-		CartView view = cart.add("LAP-003", 1); // DE laptop at 19%
+	void appliesPolishRates() {
+		CartView view = cart.add("LAP-003", 1); // 5213.04 PLN, laptop at 23%
 
 		assertThat(view.lines()).singleElement().satisfies(line -> {
-			assertThat(line.vatRate()).isEqualByComparingTo("19");
-			assertThat(line.vat()).isEqualByComparingTo("227.81");
+			assertThat(line.vatRate()).isEqualByComparingTo("23");
+			assertThat(line.vat()).isEqualByComparingTo("1199.00");
 		});
 	}
 

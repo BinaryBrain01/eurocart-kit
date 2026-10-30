@@ -38,7 +38,7 @@ class CartApiTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.length()").value(51))
 				.andExpect(jsonPath("$[0].id").value("LAP-001"))
-				.andExpect(jsonPath("$[0].price").value(899.00));
+				.andExpect(jsonPath("$[0].price").value(3908.70));
 	}
 
 	@Test
@@ -50,8 +50,8 @@ class CartApiTest {
 				.andExpect(jsonPath("$.lines.length()").value(1))
 				.andExpect(jsonPath("$.lines[0].product.id").value("BOK-001"))
 				.andExpect(jsonPath("$.lines[0].quantity").value(2))
-				.andExpect(jsonPath("$.lines[0].lineTotal").value(25.00))
-				.andExpect(jsonPath("$.subtotal").value(25.00));
+				.andExpect(jsonPath("$.lines[0].lineTotal").value(108.70))
+				.andExpect(jsonPath("$.subtotal").value(108.70));
 	}
 
 	@Test
@@ -61,7 +61,7 @@ class CartApiTest {
 				.content("{\"productId\":\"FOD-002\"}"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.lines[0].quantity").value(1))
-				.andExpect(jsonPath("$.subtotal").value(1.29));
+				.andExpect(jsonPath("$.subtotal").value(5.61));
 	}
 
 	@Test
