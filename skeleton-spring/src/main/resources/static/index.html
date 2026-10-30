@@ -5,16 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>EuroCart</title>
     <style>
+        :root {
+            color-scheme: light;
+            --paper: #f3f0e8;
+            --panel: #fffdf7;
+            --ink: #171717;
+            --muted: #6b6962;
+            --line: #c9c5bb;
+            --orange: #ff5a1f;
+            --yellow: #f5d547;
+            --cyan: #62d6df;
+            --blue: #2878c8;
+            --green: #23845b;
+        }
+
         body {
             font-family: system-ui, sans-serif;
             margin: 0;
             padding: 1rem;
-            background: #f6f6f6;
-            color: #222;
+            background: var(--paper);
+            color: var(--ink);
         }
 
         h1 {
             margin: 0 0 1rem;
+            display: inline-block;
+            padding: .2rem .55rem;
+            background: var(--orange);
+            border: 2px solid var(--ink);
+            font-size: 1.8rem;
+            letter-spacing: .04em;
+            text-transform: uppercase;
         }
 
         main {
@@ -30,22 +51,27 @@
         }
 
         section {
-            background: #fff;
-            border-radius: 8px;
+            background: var(--panel);
+            border: 2px solid var(--ink);
             padding: 1rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
         }
 
         h2 {
             margin: 0 0 .5rem;
             font-size: 1.1rem;
+            border-left: 6px solid var(--cyan);
+            padding-left: .5rem;
         }
 
         h3 {
             margin: 1rem 0 .25rem;
             font-size: .9rem;
             text-transform: uppercase;
-            color: #666;
+            display: table;
+            padding: .15rem .4rem;
+            color: var(--ink);
+            background: var(--yellow);
+            border-left: 4px solid var(--orange);
         }
 
         table {
@@ -53,10 +79,28 @@
             border-collapse: collapse;
         }
 
+        thead th {
+            color: var(--panel);
+            background: var(--ink);
+            border-bottom: 2px solid var(--cyan);
+        }
+
         td, th {
             padding: .3rem .4rem;
             text-align: left;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--line);
+        }
+
+        tbody tr:hover {
+            background: #e4f7f5;
+        }
+
+        .product-table tbody tr:nth-child(even) {
+            background: #edf4fa;
+        }
+
+        .product-table tbody tr:nth-child(even):hover {
+            background: #d9f2f1;
         }
 
         td.num, th.num {
@@ -66,33 +110,63 @@
 
         button {
             cursor: pointer;
-            border: 1px solid #999;
-            background: #fafafa;
-            border-radius: 4px;
-            padding: .15rem .5rem;
+            border: 1px solid var(--ink);
+            background: var(--panel);
+            color: var(--ink);
+            padding: .3rem .65rem;
+            font: inherit;
+            font-size: .85rem;
+            font-weight: 700;
+            text-transform: uppercase;
         }
 
         button:hover {
-            background: #eee;
+            background: var(--yellow);
+        }
+
+        .product-table button {
+            border-color: var(--blue);
+            background: var(--cyan);
+        }
+
+        .product-table button:hover {
+            background: var(--yellow);
+        }
+
+        #pay {
+            background: var(--orange);
+        }
+
+        button:focus-visible {
+            outline: 3px solid var(--orange);
+            outline-offset: 2px;
         }
 
         tfoot td {
             font-weight: bold;
-            border-top: 2px solid #ccc;
+            border-top: 2px solid var(--ink);
+        }
+
+        tfoot tr:nth-child(2) {
+            background: #fff4bd;
+        }
+
+        tfoot tr:last-child {
+            background: #ffe0d2;
         }
 
         .muted {
-            color: #888;
+            color: var(--muted);
             font-size: .85rem;
         }
 
         #error {
-            color: #b00;
+            color: #a32112;
             min-height: 1.2em;
         }
 
         .success {
-            color: #080;
+            color: var(--green);
             font-weight: bold;
             min-height: 1.2em;
         }
@@ -172,6 +246,7 @@
             heading.textContent = category;
             container.appendChild(heading);
             const table = document.createElement('table');
+            table.className = 'product-table';
             for (const p of items) {
                 const row = table.insertRow();
                 row.insertCell().textContent = p.name;
