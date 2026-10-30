@@ -24,7 +24,7 @@ public class ProductCatalogue {
 	}
 
 	public List<Product> all() {
-		return List.copyOf(productsById.values());
+		return productsById.values().stream().filter(p->p.category() == Category.LAPTOP).toList();
 	}
 
 	public Optional<Product> find(String id) {
