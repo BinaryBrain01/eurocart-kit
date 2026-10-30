@@ -18,7 +18,7 @@ On Windows use `mvnw.cmd`.
 
 Both files live in `src/main/resources/` and are plain JSON, so you can also use them without this skeleton.
 
-- `catalogue.json`: 50 products, prices in EUR excluding VAT.
+- `catalogue.json`: 51 products, prices in EUR excluding VAT.
 - `discount.json`: 50 discount codes as issued by Sales. Types are `PERCENTAGE`, `FIXED_AMOUNT` (with
   `currency`) and `FREE_SHIPPING`. Optional fields: `categories`, `countries`, `validFrom`, `validUntil`
   and `minimumOrder`; a missing field means no restriction. Whether every code is actually allowed is
