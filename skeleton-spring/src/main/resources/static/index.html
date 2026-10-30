@@ -1,115 +1,218 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>EuroCart</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 0; padding: 1rem; background: #f6f6f6; color: #222; }
-    h1 { margin: 0 0 1rem; }
-    main { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    @media (max-width: 800px) { main { grid-template-columns: 1fr; } }
-    section { background: #fff; border-radius: 8px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
-    h2 { margin: 0 0 .5rem; font-size: 1.1rem; }
-    h3 { margin: 1rem 0 .25rem; font-size: .9rem; text-transform: uppercase; color: #666; }
-    table { width: 100%; border-collapse: collapse; }
-    td, th { padding: .3rem .4rem; text-align: left; border-bottom: 1px solid #eee; }
-    td.num, th.num { text-align: right; white-space: nowrap; }
-    button { cursor: pointer; border: 1px solid #999; background: #fafafa; border-radius: 4px; padding: .15rem .5rem; }
-    button:hover { background: #eee; }
-    tfoot td { font-weight: bold; border-top: 2px solid #ccc; }
-    .muted { color: #888; font-size: .85rem; }
-    #error { color: #b00; min-height: 1.2em; }
-  </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EuroCart</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 0;
+            padding: 1rem;
+            background: #f6f6f6;
+            color: #222;
+        }
+
+        h1 {
+            margin: 0 0 1rem;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 800px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        section {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+        }
+
+        h2 {
+            margin: 0 0 .5rem;
+            font-size: 1.1rem;
+        }
+
+        h3 {
+            margin: 1rem 0 .25rem;
+            font-size: .9rem;
+            text-transform: uppercase;
+            color: #666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        td, th {
+            padding: .3rem .4rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        td.num, th.num {
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        button {
+            cursor: pointer;
+            border: 1px solid #999;
+            background: #fafafa;
+            border-radius: 4px;
+            padding: .15rem .5rem;
+        }
+
+        button:hover {
+            background: #eee;
+        }
+
+        tfoot td {
+            font-weight: bold;
+            border-top: 2px solid #ccc;
+        }
+
+        .muted {
+            color: #888;
+            font-size: .85rem;
+        }
+
+        #error {
+            color: #b00;
+            min-height: 1.2em;
+        }
+    </style>
 </head>
 <body>
-  <h1>EuroCart</h1>
-  <p id="error"></p>
-  <main>
+<h1>EuroCart</h1>
+<p id="error"></p>
+<main>
     <section>
-      <h2>Products</h2>
-      <p class="muted">Prices in EUR, excluding VAT and shipping.</p>
-      <div id="products"></div>
+        <h2>Products</h2>
+        <p class="muted">Prices in EUR, excluding VAT and shipping.</p>
+        <div id="products"></div>
     </section>
     <section>
-      <h2>Cart</h2>
-      <table>
-        <thead><tr><th>Product</th><th class="num">Qty</th><th class="num">Line total</th><th></th></tr></thead>
-        <tbody id="cart-lines"></tbody>
-        <tfoot><tr><td>Subtotal (excl. VAT)</td><td></td><td class="num" id="subtotal">€ 0,00</td><td></td></tr></tfoot>
-      </table>
-      <p><button id="clear">Empty cart</button></p>
+        <h2>Cart</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Product</th>
+                <th class="num">Qty</th>
+                <th class="num">Line total</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody id="cart-lines"></tbody>
+            <tfoot>
+            <tr>
+                <td>Subtotal (excl. VAT)</td>
+                <td></td>
+                <td class="num" id="subtotal">€ 0,00</td>
+                <td></td>
+            </tr>
+            </tfoot>
+            <tfoot>
+            <tr>
+                <td>Subtotal (incl. VAT)</td>
+                <td></td>
+                <td class="num" id="subtotalInclVAT">€ 0,00</td>
+                <td></td>
+            </tr>
+            </tfoot>
+        </table>
+        <p>
+            <button id="clear">Empty cart</button>
+        </p>
     </section>
-  </main>
+</main>
 
-  <script>
-    const eur = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' });
+<script>
+    const eur = new Intl.NumberFormat('nl-NL', {style: 'currency', currency: 'EUR'});
     const errorEl = document.getElementById('error');
 
     async function api(path, options) {
-      errorEl.textContent = '';
-      const response = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...options });
-      const body = await response.json().catch(() => null);
-      if (!response.ok) {
-        errorEl.textContent = (body && body.detail) || `${response.status} ${response.statusText}`;
-        throw new Error(errorEl.textContent);
-      }
-      return body;
+        errorEl.textContent = '';
+        const response = await fetch(path, {headers: {'Content-Type': 'application/json'}, ...options});
+        const body = await response.json().catch(() => null);
+        if (!response.ok) {
+            errorEl.textContent = (body && body.detail) || `${response.status} ${response.statusText}`;
+            throw new Error(errorEl.textContent);
+        }
+        return body;
     }
 
     function renderProducts(products) {
-      const byCategory = Map.groupBy(products, p => p.category);
-      const container = document.getElementById('products');
-      container.innerHTML = '';
-      for (const [category, items] of byCategory) {
-        const heading = document.createElement('h3');
-        heading.textContent = category;
-        container.appendChild(heading);
-        const table = document.createElement('table');
-        for (const p of items) {
-          const row = table.insertRow();
-          row.insertCell().textContent = p.name;
-          row.insertCell().innerHTML = `<span class="muted">${p.countryOfOrigin}</span>`;
-          const price = row.insertCell(); price.className = 'num'; price.textContent = eur.format(p.price);
-          const action = row.insertCell(); action.className = 'num';
-          const button = document.createElement('button');
-          button.textContent = 'Add';
-          button.onclick = () => addToCart(p.id);
-          action.appendChild(button);
+        const byCategory = Map.groupBy(products, p => p.category);
+        const container = document.getElementById('products');
+        container.innerHTML = '';
+        for (const [category, items] of byCategory) {
+            const heading = document.createElement('h3');
+            heading.textContent = category;
+            container.appendChild(heading);
+            const table = document.createElement('table');
+            for (const p of items) {
+                const row = table.insertRow();
+                row.insertCell().textContent = p.name;
+                row.insertCell().innerHTML = `<span class="muted">${p.countryOfOrigin}</span>`;
+                const price = row.insertCell();
+                price.className = 'num';
+                price.textContent = eur.format(p.price);
+                const action = row.insertCell();
+                action.className = 'num';
+                const button = document.createElement('button');
+                button.textContent = 'Add';
+                button.onclick = () => addToCart(p.id);
+                action.appendChild(button);
+            }
+            container.appendChild(table);
         }
-        container.appendChild(table);
-      }
     }
 
     function renderCart(cart) {
-      const tbody = document.getElementById('cart-lines');
-      tbody.innerHTML = '';
-      for (const line of cart.lines) {
-        const row = tbody.insertRow();
-        row.insertCell().textContent = line.product.name;
-        const qty = row.insertCell(); qty.className = 'num'; qty.textContent = line.quantity;
-        const total = row.insertCell(); total.className = 'num'; total.textContent = eur.format(line.lineTotal);
-        const action = row.insertCell(); action.className = 'num';
-        const button = document.createElement('button');
-        button.textContent = 'Remove';
-        button.onclick = () => removeFromCart(line.product.id);
-        action.appendChild(button);
-      }
-      document.getElementById('subtotal').textContent = eur.format(cart.subtotal);
+        const tbody = document.getElementById('cart-lines');
+        tbody.innerHTML = '';
+        for (const line of cart.lines) {
+            const row = tbody.insertRow();
+            row.insertCell().textContent = line.product.name;
+            const qty = row.insertCell();
+            qty.className = 'num';
+            qty.textContent = line.quantity;
+            const total = row.insertCell();
+            total.className = 'num';
+            total.textContent = eur.format(line.lineTotal);
+            const action = row.insertCell();
+            action.className = 'num';
+            const button = document.createElement('button');
+            button.textContent = 'Remove';
+            button.onclick = () => removeFromCart(line.product.id);
+            action.appendChild(button);
+        }
+        document.getElementById('subtotal').textContent = eur.format(cart.subtotal);
+        document.getElementById('subtotalInclVAT').textContent = eur.format(cart.subtotalInclVAT);
     }
 
     async function addToCart(productId) {
-      renderCart(await api('/api/cart/items', { method: 'POST', body: JSON.stringify({ productId, quantity: 1 }) }));
+        renderCart(await api('/api/cart/items', {method: 'POST', body: JSON.stringify({productId, quantity: 1})}));
     }
 
     async function removeFromCart(productId) {
-      renderCart(await api(`/api/cart/items/${productId}`, { method: 'DELETE' }));
+        renderCart(await api(`/api/cart/items/${productId}`, {method: 'DELETE'}));
     }
 
-    document.getElementById('clear').onclick = async () => renderCart(await api('/api/cart', { method: 'DELETE' }));
+    document.getElementById('clear').onclick = async () => renderCart(await api('/api/cart', {method: 'DELETE'}));
 
     api('/api/products').then(renderProducts);
     api('/api/cart').then(renderCart);
-  </script>
+</script>
 </body>
 </html>
