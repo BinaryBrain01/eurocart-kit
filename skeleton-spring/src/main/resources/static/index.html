@@ -90,6 +90,12 @@
             color: #b00;
             min-height: 1.2em;
         }
+
+        .success {
+            color: #080;
+            font-weight: bold;
+            min-height: 1.2em;
+        }
     </style>
 </head>
 <body>
@@ -131,8 +137,9 @@
             </tfoot>
         </table>
         <p>
-            <button id="clear">Empty cart</button>
+            <button id="pay">Pay</button>
         </p>
+        <p id="payment-message" class="success"></p>
     </section>
 </main>
 
@@ -209,7 +216,18 @@
         renderCart(await api(`/api/cart/items/${productId}`, {method: 'DELETE'}));
     }
 
-    document.getElementById('clear').onclick = async () => renderCart(await api('/api/cart', {method: 'DELETE'}));
+    document.getElementById('pay').onclick = async () => {
+        const messageEl = document.getElementById('payment-message');
+        messageEl.textContent = '';
+        const cart = await api('/api/cart');
+        if (cart.lines.length === 0) {
+            errorEl.textContent = 'Your cart is empty.';
+            return;
+        }
+        const total = eur.format(cart.subtotalInclVAT);
+        renderCart(await api('/api/cart', {method: 'DELETE'}));
+        messageEl.textContent = `Payment of ${total} successful. Thank you for your order!`;
+    };
 
     api('/api/products').then(renderProducts);
     api('/api/cart').then(renderCart);
