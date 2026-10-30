@@ -3,6 +3,7 @@ package nl.group9.eurocart.cart;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import nl.group9.eurocart.catalogue.Country;
 import nl.group9.eurocart.catalogue.Product;
 
 /**
@@ -14,7 +15,7 @@ public record CartLine(Product product, int quantity, BigDecimal lineTotal, BigD
 
 	public static CartLine of(Product product, int quantity) {
 		BigDecimal lineTotal = product.price().multiply(BigDecimal.valueOf(quantity));
-		BigDecimal vatRate = VatRates.rate(product.countryOfOrigin(), product.category());
+		BigDecimal vatRate = VatRates.rate(Country.PL, product.category());
 		BigDecimal vat = exactVat(lineTotal, vatRate).setScale(2, RoundingMode.HALF_UP);
 		return new CartLine(product, quantity, lineTotal, vatRate, vat);
 	}
